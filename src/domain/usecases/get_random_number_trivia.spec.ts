@@ -1,19 +1,11 @@
 import NumberTriviaRepository from '../repositories/number_trivia_repository'
 import { MockProxy, mock } from 'jest-mock-extended'
 import NumberTrivia from '../entities/number_trivia'
-import { Failure } from '@/core/error/failure'
+import GetRandomNumberTrivia from './get_random_number_trivia'
 
 type SutType = {
   sut: GetRandomNumberTrivia
   numberTriviaRepositorySpy: NumberTriviaRepository & MockProxy<NumberTriviaRepository>
-}
-
-class GetRandomNumberTrivia {
-  constructor (private readonly repository: NumberTriviaRepository) {}
-
-  async execute (): Promise<Failure | NumberTrivia> {
-    return this.repository.getRandomNumberTrivia()
-  }
 }
 
 const makeSut = (): SutType => {
