@@ -3,7 +3,7 @@ import { Failure } from '@/core/error/failure'
 import NumberTrivia from '../entities/number_trivia'
 
 export default class GetConcreteNumberTivia {
-  constructor (private repository: NumberTriviaRepository) {}
+  constructor (private readonly repository: NumberTriviaRepository) {}
 
   async execute (number: number): Promise<Failure | NumberTrivia> {
     return await this.repository.getConcreteNumberTrivia(number)
