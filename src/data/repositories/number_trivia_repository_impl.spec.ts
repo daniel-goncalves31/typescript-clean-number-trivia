@@ -74,4 +74,23 @@ describe('Number Trivia Repository Impl', () => {
       expect(result).toEqual(new ServerFailure())
     })
   })
+
+  describe('Device is offline', () => {
+    beforeAll(() => {
+      networkInfoSpy
+        .isConnected
+        .mockReturnValue(Promise.resolve(false))
+    })
+
+    test('should return last locally cached data when the cached data is present', async () => {
+      numberTriviaLocalDataSourceSpy
+        .getLastNumberTrivia
+        .mockReturnValue(Promise.resolve(tNumberTriviaModel))
+
+      const result = await sut.getConcreteNumberTrivia(tNumber)
+      expect(numberTriviaRemoteDataSourceSpy.getConcreteNumberTrivia).not.toHaveBeenCalled()
+      expect(numberTriviaLocalDataSourceSpy.getLastNumberTrivia).toHaveBeenCalled()
+      expect(result).toEqual(tNumberTrivia)
+    })
+  })
 })

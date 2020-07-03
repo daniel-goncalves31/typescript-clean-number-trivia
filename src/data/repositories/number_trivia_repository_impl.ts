@@ -13,13 +13,17 @@ export default class NumberTriviaRepositoryImpl implements NumberTriviaRepositor
   ) {}
 
   async getConcreteNumberTrivia (number: number): Promise<Failure | NumberTrivia> {
-    this.networkInfo.isConnected()
-    try {
-      const numberTrivia = await this.remoteDataSource.getConcreteNumberTrivia(number)
-      this.localDataSource.cacheNumberTrivia(numberTrivia)
-      return numberTrivia
-    } catch (error) {
-      return new ServerFailure()
+    if (await this.networkInfo.isConnected()) {
+      try {
+        const numberTrivia = await this.remoteDataSource.getConcreteNumberTrivia(number)
+        this.localDataSource.cacheNumberTrivia(numberTrivia)
+        return numberTrivia
+      } catch (error) {
+        return new ServerFailure()
+      }
+    } else {
+      const localTrivia = await this.localDataSource.getLastNumberTrivia()
+      return localTrivia
     }
   }
 
