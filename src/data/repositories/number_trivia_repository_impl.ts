@@ -1,5 +1,5 @@
 import NumberTriviaRepository from '@/domain/repositories/number_trivia_repository'
-import { Failure } from '@/core/error/failure'
+import { Failure, ServerFailure } from '@/core/error/failure'
 import NumberTrivia from '@/domain/entities/number_trivia'
 import { NumberTriviaLocalDataSource } from '../datasources/number_trivia_local_datasource'
 import { NumberTriviaRemoteDataSource } from '../datasources/number_trivia_remote_datasource'
@@ -14,9 +14,13 @@ export default class NumberTriviaRepositoryImpl implements NumberTriviaRepositor
 
   async getConcreteNumberTrivia (number: number): Promise<Failure | NumberTrivia> {
     this.networkInfo.isConnected()
-    const numberTrivia = await this.remoteDataSource.getConcreteNumberTrivia(number)
-    this.localDataSource.cacheNumberTrivia(numberTrivia)
-    return numberTrivia
+    try {
+      const numberTrivia = await this.remoteDataSource.getConcreteNumberTrivia(number)
+      this.localDataSource.cacheNumberTrivia(numberTrivia)
+      return numberTrivia
+    } catch (error) {
+      return new ServerFailure()
+    }
   }
 
   getRandomNumberTrivia (): Promise<Failure | NumberTrivia> {

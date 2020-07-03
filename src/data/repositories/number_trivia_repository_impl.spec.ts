@@ -5,6 +5,8 @@ import { NetworkInfo } from '@/core/utils/network_info'
 import NumberTriviaRepositoryImpl from './number_trivia_repository_impl'
 import NumberTriviaModel from '../models/number_trivia_model'
 import NumberTrivia from '@/domain/entities/number_trivia'
+import { ServerException } from '@/core/error/exception'
+import { ServerFailure } from '@/core/error/failure'
 
 type SutType = {
   numberTriviaLocalDataSourceSpy: NumberTriviaLocalDataSource & MockProxy<NumberTriviaLocalDataSource>,
@@ -17,6 +19,7 @@ const makeSut = (): SutType => {
   const numberTriviaLocalDataSourceSpy = mock<NumberTriviaLocalDataSource>()
   const numberTriviaRemoteDataSourceSpy = mock<NumberTriviaRemoteDataSource>()
   const networkInfoSpy = mock<NetworkInfo>()
+
   const sut = new NumberTriviaRepositoryImpl(
     numberTriviaLocalDataSourceSpy,
     numberTriviaRemoteDataSourceSpy,
@@ -51,7 +54,10 @@ describe('Number Trivia Repository Impl', () => {
 
     test('should return remote data when the call to remote data source is successful', async () => {
       const { sut, numberTriviaRemoteDataSourceSpy } = makeSut()
-      numberTriviaRemoteDataSourceSpy.getConcreteNumberTrivia.mockReturnValue(Promise.resolve(tNumberTriviaModel))
+      numberTriviaRemoteDataSourceSpy
+        .getConcreteNumberTrivia
+        .mockReturnValue(Promise.resolve(tNumberTriviaModel))
+
       const result = await sut.getConcreteNumberTrivia(tNumber)
       expect(numberTriviaRemoteDataSourceSpy.getConcreteNumberTrivia).toHaveBeenCalledWith(tNumber)
       expect(result).toEqual(tNumberTrivia)
@@ -59,9 +65,24 @@ describe('Number Trivia Repository Impl', () => {
 
     test('should cache the data locally when the call to remote data source is successful', async () => {
       const { sut, numberTriviaRemoteDataSourceSpy, numberTriviaLocalDataSourceSpy } = makeSut()
-      numberTriviaRemoteDataSourceSpy.getConcreteNumberTrivia.mockReturnValue(Promise.resolve(tNumberTriviaModel))
+      numberTriviaRemoteDataSourceSpy
+        .getConcreteNumberTrivia
+        .mockReturnValue(Promise.resolve(tNumberTriviaModel))
+
       await sut.getConcreteNumberTrivia(tNumber)
       expect(numberTriviaLocalDataSourceSpy.cacheNumberTrivia).toHaveBeenCalledWith(tNumberTriviaModel)
+    })
+
+    test('should return server failure when the call to remote data source is unsuccessful', async () => {
+      const { sut, numberTriviaRemoteDataSourceSpy, numberTriviaLocalDataSourceSpy } = makeSut()
+      numberTriviaRemoteDataSourceSpy
+        .getConcreteNumberTrivia
+        .mockImplementationOnce(() => {
+          throw new ServerException('', '')
+        })
+      const result = await sut.getConcreteNumberTrivia(tNumber)
+      expect(numberTriviaLocalDataSourceSpy.cacheNumberTrivia).not.toHaveBeenCalled()
+      expect(result).toEqual(new ServerFailure())
     })
   })
 })
