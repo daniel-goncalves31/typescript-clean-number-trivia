@@ -1,7 +1,7 @@
-export interface Failure {
+export abstract class Failure {
   properties: {}[]
 }
 
-export interface ServerFailure extends Failure {}
+export class ServerFailure extends Failure {}
 
-export interface CacheFailure extends Failure {}
+export class CacheFailure extends Failure {}
