@@ -1,4 +1,4 @@
-export default interface NumberTrivia {
+export default abstract class NumberTrivia {
   text: string
   number: number
 }
