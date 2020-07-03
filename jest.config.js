@@ -1,10 +1,10 @@
 module.exports = {
-  rootDir: '.',
+  roots: ['src'],
   clearMocks: true,
   coverageDirectory: 'coverage',
   testEnvironment: 'node',
   moduleNameMapper: {
-    '@/(.*)': 'src/$1'
+    '@/(.*)': '<rootDir>/src/$1'
   },
   preset: 'ts-jest'
 
